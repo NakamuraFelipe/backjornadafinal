@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS # type: ignore
+import os
 
 from routes.login import login_bp
 from routes.lead_routes import lead_bp
