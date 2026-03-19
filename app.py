@@ -35,5 +35,4 @@ app.register_blueprint(all_leads_bp)
 
 
 if __name__ == '__main__':
-    # 🔹 Host 0.0.0.0 permite acessar de outros dispositivos na mesma rede
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)  # apenas local
