@@ -127,54 +127,62 @@ class LeadDAO:
             traceback.print_exc()
             raise e
 
-    @staticmethod
-    def create_lead(lead: Lead):
-        """Cria o lead no banco"""
-        if not all([lead.nome_local, lead.responsavel, lead.telefone, lead.estado_leads, lead.id_usuario]):
-            raise ValueError(
-                "Campos obrigatórios do lead estão vazios.",
-                lead.nome_local, lead.responsavel, lead.telefone, lead.estado_leads, lead.id_usuario
-            )
+    @staticmethoddef 
+    create_lead(lead: Lead, visita):
+    if not all([lead.nome_local, lead.responsavel, lead.telefone, lead.estado_leads, lead.id_usuario]):
+        raise ValueError("Campos obrigatórios do lead estão vazios.")
 
-        try:
-            with get_db_connection() as conn:
-                with conn.cursor() as cur:
-                    query = """
-                        INSERT INTO leads (nome_local, nome_responsavel, id_localizacao,
-                                           id_usuario, valor_proposta, categoria_venda, observacao, estado_leads)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                        RETURNING id_lead
-                    """
-                    values = (
-                        lead.nome_local,
-                        lead.responsavel,
-                        lead.id_localizacao,
-                        lead.id_usuario,
-                        lead.valor,
-                        lead.categoria_venda,
-                        lead.observacao,
-                        lead.estado_leads
-                    )
-                    cur.execute(query, values)
-                    inserted_id = cur.fetchone()['id_lead']
-                    print(f"Lead inserido com sucesso -> id_lead={inserted_id}")
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
 
-                    # Inserir telefone na tabela telefone
-                    if lead.telefone:
-                        tel_query = """
-                            INSERT INTO telefone (id_leads, telefone)
-                            VALUES (%s, %s)
-                        """
-                        cur.execute(tel_query, (inserted_id, lead.telefone))
-                        print(f"Telefone inserido com sucesso -> {lead.telefone}")
+                # --- INSERT LEAD ---
+                query = """
+                    INSERT INTO leads (nome_local, nome_responsavel, id_localizacao,
+                                       id_usuario, categoria_venda, estado_leads, telefone)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id_lead
+                """
 
-                    conn.commit()
-                    return inserted_id
+                values = (
+                    lead.nome_local,
+                    lead.responsavel,
+                    lead.id_localizacao,
+                    lead.id_usuario,
+                    lead.categoria_venda,
+                    lead.estado_leads,
+                    lead.telefone
+                )
 
-        except Exception as e:
-            print("Erro em create_lead:", e)
-            traceback.print_exc()
-            raise e
+                cur.execute(query, values)
+                inserted_id = cur.fetchone()['id_lead']
+
+                print(f"Lead inserido -> id_lead={inserted_id}")
+
+                
+                visita_query = """
+                    INSERT INTO visita (id_lead, id_usuario, proxima_visita, observacao, valor_acordado)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+
+                cur.execute(visita_query, (
+                    inserted_id,
+                    visita.id_usuario,
+                    visita.proxima_visita,
+                    visita.observacao,
+                    visita.valor_acordado
+                ))
+
+                print("Visita criada com sucesso")
+
+                conn.commit()
+                return inserted_id
+
+    except Exception as e:
+        conn.rollback()  # 🔥 garante que não salva nada
+        print("Erro em create_lead:", e)
+        traceback.print_exc()
+        raise e
 
     @staticmethod
     def get_all():
