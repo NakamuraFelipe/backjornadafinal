@@ -25,15 +25,13 @@ class Address:
 
 class Lead:
     def __init__(self, nome_local, responsavel, telefone, endereco: Address, estado_leads,
-                 categoria_venda=None, observacao=None, valor=None, id_usuario=None):
+                 categoria_venda=None, id_usuario=None):
         self.nome_local = nome_local
         self.responsavel = responsavel
         self.telefone = telefone
         self.endereco = endereco
         self.estado_leads = estado_leads
         self.categoria_venda = categoria_venda
-        self.observacao = observacao
-        self.valor = valor
         self.id_usuario = id_usuario
         self.id_localizacao = None  # inicializa como None
 
@@ -47,7 +45,5 @@ class Lead:
             endereco=endereco,
             estado_leads=data.get('estado_leads'),
             categoria_venda=data.get('categoria_venda'),
-            observacao=data.get('observacao'),
-            valor=data.get('valor_proposta'),
             id_usuario=data.get('id_usuario')
         )
